@@ -47,7 +47,7 @@ def test_register_call_counts_calls_between_local_and_foreign_users() -> None:
     assert switchboard.get_cross_border_calls_count() == 1
 
 
-def test_register_and_unregister_call() -> None:
+def test_unregister_call() -> None:
     switchboard = Switchboard()
 
     call1 = switchboard.register_call(
@@ -63,9 +63,36 @@ def test_register_and_unregister_call() -> None:
         "3,Jacque Fresco,+78880000000,4,Robert Oppenheimer,+79991112233"
     )
     switchboard.register_call(
-        "5,Keanu Reeves,+33123456789,6,Thomas Hanks,+442012345678"
+        "5,Keanu Reeves,+33123456789,6,Thomas Hanks,+44201234567"
     )
     assert switchboard.get_active_calls_count() == 2
 
     switchboard.unregister_last_call()
     assert switchboard.get_active_calls_count() == 1
+
+def test_incorrect_number() -> None:
+    switchboard = Switchboard()
+
+    call1 = switchboard.register_call(
+        "1,Chuck Norris,blablabla,2,Kurt Cobain,bububu"
+    )
+
+    assert switchboard.get_active_calls_count() == 0
+
+def test_incorrect_user() -> None:
+    switchboard = Switchboard()
+
+    call1 = switchboard.register_call(
+        "1,Chuck Norris,+79990000000,2,123,+44201234567"
+    )
+
+    assert switchboard.get_active_calls_count() == 0
+
+def test_incorrect_id() -> None:
+    switchboard = Switchboard()
+
+    call1 = switchboard.register_call(
+        "1,Chuck Norris,+79990000000,-1,Adele,+44201234567"
+    )
+
+    assert switchboard.get_active_calls_count() == 0

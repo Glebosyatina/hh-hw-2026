@@ -43,12 +43,18 @@ class Switchboard:
         receiver = None
 
         #создаем callera и receivera
-        if (params[2].startswith("+7")):
+
+        if (self.validateUser(params[:3]) == False or self.validateUser(params[3:]) == False):
+            print("Некорректный ввод, звонок не зарегистрирован")
+            return None
+
+
+        if self.isLocalNumber(params[2]):
             caller = LocalUser(id=int(params[0]), fullname=params[1], phone=params[2])
         else:
             caller = ForeignUser(id=int(params[0]), fullname=params[1], phone=params[2])
 
-        if (params[5].startswith("+7")):
+        if self.isLocalNumber(params[5]):
             receiver = LocalUser(id=int(params[3]), fullname=params[4], phone=params[5])
         else:
            receiver = ForeignUser(id=int(params[3]), fullname=params[4], phone=params[5])
@@ -78,3 +84,25 @@ class Switchboard:
 
     def get_cross_border_calls_count(self) -> int:
         return self._cross_border_calls
+
+    @staticmethod
+    def validateUser(params) -> bool:
+        try:
+            int(params[0])
+        except (ValueError, TypeError):
+            return False
+
+        if int(params[0]) < 0:
+            return False
+
+        if isinstance(params[1], str) == False or params[1] == "" or params[1].isnumeric():
+            return False
+
+        if isinstance(params[2], str) == False or (params[2].startswith("+") == False) or len(params[2]) < 11:
+            return False
+
+        return True
+
+    @staticmethod
+    def isLocalNumber(num: str):
+        return num.startswith("+7")
