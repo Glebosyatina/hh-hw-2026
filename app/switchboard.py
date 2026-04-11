@@ -49,15 +49,7 @@ class Switchboard:
             return None
 
 
-        if self.isLocalNumber(params[2]):
-            caller = LocalUser(id=int(params[0]), fullname=params[1], phone=params[2])
-        else:
-            caller = ForeignUser(id=int(params[0]), fullname=params[1], phone=params[2])
-
-        if self.isLocalNumber(params[5]):
-            receiver = LocalUser(id=int(params[3]), fullname=params[4], phone=params[5])
-        else:
-           receiver = ForeignUser(id=int(params[3]), fullname=params[4], phone=params[5])
+        caller, receiver = Switchboard.getCallerAndReceiver(params)
 
         #добавляем в лист активных звонков текущий вызов
         activeCall = ActiveCall(caller, receiver)
@@ -87,6 +79,7 @@ class Switchboard:
 
     @staticmethod
     def validateUser(params) -> bool:
+        #проверка id
         try:
             int(params[0])
         except (ValueError, TypeError):
@@ -95,13 +88,33 @@ class Switchboard:
         if int(params[0]) < 0:
             return False
 
+        #проверка имени и фамилии
         if isinstance(params[1], str) == False or params[1] == "" or params[1].isnumeric():
             return False
 
+        nameAndSurname = params[1].split()
+        if len(nameAndSurname) != 2 or nameAndSurname[0].isnumeric() or nameAndSurname[1].isnumeric():
+            return False
+
+        #проверка номера
         if isinstance(params[2], str) == False or (params[2].startswith("+") == False) or len(params[2]) < 11:
             return False
 
         return True
+
+    @staticmethod
+    def getCallerAndReceiver(params):
+        if Switchboard.isLocalNumber(params[2]):
+                caller = LocalUser(id=int(params[0]), fullname=params[1], phone=params[2])
+        else:
+            caller = ForeignUser(id=int(params[0]), fullname=params[1], phone=params[2])
+
+        if Switchboard.isLocalNumber(params[5]):
+            receiver = LocalUser(id=int(params[3]), fullname=params[4], phone=params[5])
+        else:
+           receiver = ForeignUser(id=int(params[3]), fullname=params[4], phone=params[5])
+
+        return caller, receiver
 
     @staticmethod
     def isLocalNumber(num: str):
