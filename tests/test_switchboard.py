@@ -85,6 +85,9 @@ def test_incorrect_user() -> None:
     call1 = switchboard.register_call(
         "1,Chuck Norris,+79990000000,2,user123,+44201234567"
     )
+    call2 = switchboard.register_call(
+            "1,Chuck Norris,+79990000000,2,user 123,+44201234567"
+        )
 
     assert switchboard.get_active_calls_count() == 0
 

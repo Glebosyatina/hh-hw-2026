@@ -44,12 +44,12 @@ class Switchboard:
 
         #создаем callera и receivera
 
-        if (self.validateUser(params[:3]) == False or self.validateUser(params[3:]) == False):
+        if (self.validate_user(params[:3]) == False or self.validate_user(params[3:]) == False):
             print("Некорректный ввод, звонок не зарегистрирован")
             return None
 
-
-        caller, receiver = Switchboard.getCallerAndReceiver(params)
+        caller = Switchboard.make_user(params[0],params[1],params[2])
+        receiver = Switchboard.make_user(params[3], params[4], params[5])
 
         #добавляем в лист активных звонков текущий вызов
         activeCall = ActiveCall(caller, receiver)
@@ -78,7 +78,7 @@ class Switchboard:
         return self._cross_border_calls
 
     @staticmethod
-    def validateUser(params) -> bool:
+    def validate_user(params) -> bool:
         #проверка id
         try:
             int(params[0])
@@ -89,11 +89,9 @@ class Switchboard:
             return False
 
         #проверка имени и фамилии
-        if isinstance(params[1], str) == False or params[1] == "" or params[1].isnumeric():
-            return False
-
-        nameAndSurname = params[1].split()
-        if len(nameAndSurname) != 2 or nameAndSurname[0].isnumeric() or nameAndSurname[1].isnumeric():
+        any_number = any(char.isdigit() for char in params[1])
+        name_and_surname = params[1].split()
+        if isinstance(params[1], str) == False or params[1] == "" or any_number or len(name_and_surname) != 2:
             return False
 
         #проверка номера
@@ -103,19 +101,10 @@ class Switchboard:
         return True
 
     @staticmethod
-    def getCallerAndReceiver(params):
-        if Switchboard.isLocalNumber(params[2]):
-                caller = LocalUser(id=int(params[0]), fullname=params[1], phone=params[2])
-        else:
-            caller = ForeignUser(id=int(params[0]), fullname=params[1], phone=params[2])
-
-        if Switchboard.isLocalNumber(params[5]):
-            receiver = LocalUser(id=int(params[3]), fullname=params[4], phone=params[5])
-        else:
-           receiver = ForeignUser(id=int(params[3]), fullname=params[4], phone=params[5])
-
-        return caller, receiver
+    def make_user(id, fullname, phone):
+        user_class = LocalUser if Switchboard.is_local_number(phone) else ForeignUser
+        return user_class(id=int(id), fullname=fullname, phone=phone)
 
     @staticmethod
-    def isLocalNumber(num: str):
+    def is_local_number(num: str):
         return num.startswith("+7")
